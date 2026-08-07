@@ -1,0 +1,105 @@
+<div class="login-container">
+  <div class="login-card">
+    <h1>{{ isLogin() ? 'Connexion' : 'Inscription' }}</h1>
+    
+    @if (errorMessage()) {
+      <div class="error-message">{{ errorMessage() }}</div>
+    }
+
+    @if (isLogin()) {
+      <!-- Login Form -->
+      <form (ngSubmit)="login()" class="form">
+        <div class="form-group">
+          <label for="login-email">Email</label>
+          <input 
+            id="login-email"
+            type="email" 
+            [(ngModel)]="loginForm.email" 
+            name="email"
+            placeholder="Votre email"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="login-password">Mot de passe</label>
+          <input 
+            id="login-password"
+            type="password" 
+            [(ngModel)]="loginForm.password" 
+            name="password"
+            placeholder="Votre mot de passe"
+            required
+          />
+        </div>
+
+        <button type="submit" [disabled]="isLoading()" class="btn-submit">
+          {{ isLoading() ? 'Connexion...' : 'Se connecter' }}
+        </button>
+      </form>
+
+      <p class="toggle-text">
+        Pas encore inscrit ? <a href="javascript:void(0)" (click)="toggleMode()">Créer un compte</a>
+      </p>
+    } @else {
+      <!-- Register Form -->
+      <form (ngSubmit)="register()" class="form">
+        <div class="form-group">
+          <label for="reg-email">Email</label>
+          <input 
+            id="reg-email"
+            type="email" 
+            [(ngModel)]="registerForm.email" 
+            name="email"
+            placeholder="Votre email"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="reg-nom">Nom</label>
+          <input 
+            id="reg-nom"
+            type="text" 
+            [(ngModel)]="registerForm.nom" 
+            name="nom"
+            placeholder="Votre nom"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="reg-prenom">Prénom</label>
+          <input 
+            id="reg-prenom"
+            type="text" 
+            [(ngModel)]="registerForm.prenom" 
+            name="prenom"
+            placeholder="Votre prénom"
+            required
+          />
+        </div>
+
+        <div class="form-group">
+          <label for="reg-password">Mot de passe</label>
+          <input 
+            id="reg-password"
+            type="password" 
+            [(ngModel)]="registerForm.password" 
+            name="password"
+            placeholder="Créer un mot de passe"
+            required
+          />
+        </div>
+
+        <button type="submit" [disabled]="isLoading()" class="btn-submit">
+          {{ isLoading() ? 'Inscription...' : 'S\'inscrire' }}
+        </button>
+      </form>
+
+      <p class="toggle-text">
+        Déjà inscrit ? <a href="javascript:void(0)" (click)="toggleMode()">Se connecter</a>
+      </p>
+    }
+  </div>
+</div>

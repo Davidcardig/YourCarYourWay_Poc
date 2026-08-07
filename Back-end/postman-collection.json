@@ -1,0 +1,136 @@
+{
+  "info": {
+    "name": "YCYW Chat API",
+    "description": "API Chat Temps Réel - Your Car Your Way",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "1. Créer Conversation",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"clientId\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"canal\": \"CHAT\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/chat/conversations",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "chat", "conversations"]
+        }
+      }
+    },
+    {
+      "name": "2. Récupérer Conversation",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/chat/conversations/{{conversationId}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "chat", "conversations", "{{conversationId}}"]
+        }
+      }
+    },
+    {
+      "name": "3. Envoyer Message (CLIENT)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"expediteur\": \"CLIENT\",\n  \"contenu\": \"Bonjour, j'ai besoin d'aide pour ma réservation\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/chat/conversations/{{conversationId}}/messages",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "chat", "conversations", "{{conversationId}}", "messages"]
+        }
+      }
+    },
+    {
+      "name": "4. Envoyer Message (AGENT)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"expediteur\": \"AGENT\",\n  \"contenu\": \"Bonjour ! Je suis ici pour vous aider. Quelle est votre question ?\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/chat/conversations/{{conversationId}}/messages",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "chat", "conversations", "{{conversationId}}", "messages"]
+        }
+      }
+    },
+    {
+      "name": "5. Récupérer Messages",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/chat/conversations/{{conversationId}}/messages",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "chat", "conversations", "{{conversationId}}", "messages"]
+        }
+      }
+    },
+    {
+      "name": "6. Fermer Conversation",
+      "request": {
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"statut\": \"FERMEE\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/chat/conversations/{{conversationId}}",
+          "protocol": "http",
+          "host": ["localhost"],
+          "port": "8080",
+          "path": ["api", "chat", "conversations", "{{conversationId}}"]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "conversationId",
+      "value": "550e8400-e29b-41d4-a716-446655440000",
+      "type": "string"
+    }
+  ]
+}

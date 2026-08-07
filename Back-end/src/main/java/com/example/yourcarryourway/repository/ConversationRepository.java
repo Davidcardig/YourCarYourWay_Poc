@@ -1,0 +1,13 @@
+package com.example.yourcarryourway.repository;
+
+import com.example.yourcarryourway.domain.entities.Conversation;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.Optional;
+import java.util.UUID;
+
+@Repository
+public interface ConversationRepository extends JpaRepository<Conversation, UUID> {
+    Optional<Conversation> findById(UUID id);
+}

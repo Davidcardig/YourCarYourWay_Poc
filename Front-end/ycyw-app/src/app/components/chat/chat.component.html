@@ -1,0 +1,36 @@
+<div class="chat-container">
+  <div class="chat-header">
+    <div class="header-content">
+      <h2>Support Chat</h2>
+    </div>
+    <div class="header-actions">
+      <button (click)="closeChat()" [disabled]="!conversation" title="Fermer le chat">Fermer le chat</button>
+      <button (click)="logout()" class="logout-btn" title="Déconnexion">Déconnexion</button>
+    </div>
+  </div>
+
+  <div class="chat-messages">
+    <div *ngIf="!conversation" class="loading">
+      Initialisation du chat...
+    </div>
+
+    <div *ngFor="let msg of messages" [ngClass]="'message ' + msg.expediteur.toLowerCase()">
+      <div class="message-sender">{{ msg.expediteur }}</div>
+      <div class="message-content">{{ msg.contenu }}</div>
+      <div class="message-time">{{ msg.horodatage | date: 'HH:mm' }}</div>
+    </div>
+  </div>
+
+  <div class="chat-input-area" *ngIf="conversation">
+    <input
+      type="text"
+      [(ngModel)]="newMessage"
+      (keyup.enter)="sendMessage()"
+      placeholder="Votre message..."
+      [disabled]="isLoading"
+    />
+    <button (click)="sendMessage()" [disabled]="isLoading || !newMessage.trim()">
+      {{ isLoading ? '...' : 'Envoyer' }}
+    </button>
+  </div>
+</div>
