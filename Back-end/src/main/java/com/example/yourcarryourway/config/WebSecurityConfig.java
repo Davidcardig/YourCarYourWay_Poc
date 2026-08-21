@@ -23,9 +23,7 @@ public class WebSecurityConfig {
             .csrf(csrf -> csrf.disable())
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(authz -> authz
-                // Endpoints publics (authentification)
                 .requestMatchers("/api/auth/**").permitAll()
-                // Tous les autres endpoints
                 .anyRequest().permitAll()
             );
         

@@ -8,6 +8,7 @@ export interface AuthResponse {
   email: string;
   nom: string;
   prenom: string;
+  role: 'AGENT' | 'CLIENT';
 }
 
 @Injectable({
@@ -29,9 +30,9 @@ export class AuthService {
       );
   }
 
-  register(email: string, password: string, nom: string, prenom: string): Observable<AuthResponse> {
+  register(email: string, password: string, nom: string, prenom: string, role: 'AGENT' | 'CLIENT'): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/register`, 
-      { email, password, nom, prenom }
+      { email, password, nom, prenom, role }
     ).pipe(
       tap(response => this.handleAuthResponse(response))
     );
