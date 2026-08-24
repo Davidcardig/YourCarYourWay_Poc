@@ -17,7 +17,7 @@
         ],
         "body": {
           "mode": "raw",
-          "raw": "{\n  \"clientId\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"canal\": \"CHAT\"\n}"
+          "raw": "{\n  \"userId\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"canal\": \"CHAT\"\n}"
         },
         "url": {
           "raw": "http://localhost:8080/api/chat/conversations",
