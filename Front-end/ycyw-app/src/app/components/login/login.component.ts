@@ -25,7 +25,8 @@ export class LoginComponent {
     email: '',
     password: '',
     nom: '',
-    prenom: ''
+    prenom: '',
+    role: 'CLIENT' as 'AGENT' | 'CLIENT'
   };
 
   constructor(private authService: AuthService, private router: Router) {}
@@ -66,7 +67,8 @@ export class LoginComponent {
       this.registerForm.email,
       this.registerForm.password,
       this.registerForm.nom,
-      this.registerForm.prenom
+      this.registerForm.prenom,
+      this.registerForm.role
     ).subscribe({
       next: (response) => {
         this.isLoading.set(false);

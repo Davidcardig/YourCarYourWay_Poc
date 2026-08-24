@@ -92,6 +92,19 @@
           />
         </div>
 
+        <div class="form-group">
+          <label for="reg-role">Statut</label>
+          <select
+            id="reg-role"
+            [(ngModel)]="registerForm.role"
+            name="role"
+            required
+          >
+            <option value="CLIENT">Client</option>
+            <option value="AGENT">Agent</option>
+          </select>
+        </div>
+
         <button type="submit" [disabled]="isLoading()" class="btn-submit">
           {{ isLoading() ? 'Inscription...' : 'S\'inscrire' }}
         </button>

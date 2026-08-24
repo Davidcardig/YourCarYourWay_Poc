@@ -5,15 +5,17 @@ public class RegisterRequest {
     private String password;
     private String nom;
     private String prenom;
+    private String role;
 
     public RegisterRequest() {
     }
 
-    public RegisterRequest(String email, String password, String nom, String prenom) {
+    public RegisterRequest(String email, String password, String nom, String prenom, String role) {
         this.email = email;
         this.password = password;
         this.nom = nom;
         this.prenom = prenom;
+        this.role = role;
     }
 
     public String getEmail() {
@@ -46,5 +48,13 @@ public class RegisterRequest {
 
     public void setPrenom(String prenom) {
         this.prenom = prenom;
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 }
