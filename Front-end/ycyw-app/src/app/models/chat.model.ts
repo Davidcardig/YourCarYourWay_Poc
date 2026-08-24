@@ -8,8 +8,12 @@ export interface Message {
 
 export interface Conversation {
   id: string;
-  clientId: string;
-  canal: 'CHAT' | 'MESSAGE';
+  clientUserId: string;
+  agentUserId?: string | null;
+  clientNom: string;
+  clientPrenom: string;
+  agentPrenom?: string | null;
+  sujet: string;
   statut: 'OUVERTE' | 'FERMEE';
   dateOuverture: string;
   messages?: Message[];

@@ -1,36 +1,101 @@
+<div class="chat-page-header">
+  <div class="connected-user">{{ getConnectedUserDisplay() }}</div>
+  <button (click)="logout()" class="page-logout-btn" title="Déconnexion">Déconnexion</button>
+</div>
+
 <div class="chat-container">
-  <div class="chat-header">
-    <div class="header-content">
-      <h2>Support Chat</h2>
-    </div>
-    <div class="header-actions">
-      <button (click)="closeChat()" [disabled]="!conversation" title="Fermer le chat">Fermer le chat</button>
-      <button (click)="logout()" class="logout-btn" title="Déconnexion">Déconnexion</button>
-    </div>
-  </div>
-
-  <div class="chat-messages">
-    <div *ngIf="!conversation" class="loading">
-      Initialisation du chat...
-    </div>
-
-    <div *ngFor="let msg of messages" [ngClass]="'message ' + msg.expediteur.toLowerCase()">
-      <div class="message-sender">{{ msg.expediteur }}</div>
-      <div class="message-content">{{ msg.contenu }}</div>
-      <div class="message-time">{{ msg.horodatage | date: 'HH:mm' }}</div>
+  <div class="popin-backdrop" *ngIf="isSubjectPopinOpen()">
+    <div class="popin-card">
+      <p>Sujet de la conversation</p>
+      <input
+        type="text"
+        [ngModel]="newConversationSubject()"
+        (ngModelChange)="newConversationSubject.set($event)"
+        placeholder="Ex: Problème de réservation"
+        [disabled]="isLoading()"
+      />
+      <div class="popin-actions">
+        <button type="button" class="secondary-btn" (click)="cancelSubjectPopin()" [disabled]="isLoading()">Annuler</button>
+        <button type="button" (click)="confirmCreateConversation()" [disabled]="isLoading()">Créer</button>
+      </div>
     </div>
   </div>
 
-  <div class="chat-input-area" *ngIf="conversation">
-    <input
-      type="text"
-      [(ngModel)]="newMessage"
-      (keyup.enter)="sendMessage()"
-      placeholder="Votre message..."
-      [disabled]="isLoading"
-    />
-    <button (click)="sendMessage()" [disabled]="isLoading || !newMessage.trim()">
-      {{ isLoading ? '...' : 'Envoyer' }}
-    </button>
+  <div class="popin-backdrop" *ngIf="popinMessage()">
+    <div class="popin-card">
+      <p>{{ popinMessage() }}</p>
+      <button (click)="closePopin()">OK</button>
+    </div>
+  </div>
+
+  <div class="chat-sidebar">
+    <div class="sidebar-header">
+      <h3>{{ isAgent() ? 'Conversations attribuées' : 'Mes conversations' }}</h3>
+      <button *ngIf="isClient()" (click)="createConversation()" [disabled]="!canCreateConversation()" title="Nouvelle conversation">
+        +
+      </button>
+    </div>
+
+    <div class="sidebar-list" *ngIf="!isLoadingList(); else loadingList">
+      <button
+        *ngFor="let conv of conversations()"
+        class="conversation-item"
+        [class.active]="isSelectedConversation(conv.id)"
+        (click)="openConversation(conv)"
+      >
+        <span>{{ conv.sujet || ('#' + conv.id.slice(0, 8)) }}</span>
+        <small>{{ conv.statut }}</small>
+      </button>
+
+      <div *ngIf="conversations().length === 0" class="empty-list">
+        {{ isAgent() ? 'Aucune conversation attribuée.' : 'Aucune conversation.' }}
+      </div>
+    </div>
+
+    <ng-template #loadingList>
+      <div class="empty-list">Chargement...</div>
+    </ng-template>
+
+  </div>
+
+  <div class="chat-main">
+    <div class="chat-header">
+      <div class="header-content">
+        <h2>Support Chat</h2>
+      </div>
+      <div class="header-actions">
+        <button (click)="closeChat()" [disabled]="!conversation()" title="Fermer le chat">Fermer le chat</button>
+      </div>
+    </div>
+
+    <div class="chat-messages">
+      <div *ngIf="!conversation() && !initError()" class="loading">
+        Sélectionnez une conversation{{ isClient() ? ' ou créez-en une avec +' : '' }}.
+      </div>
+
+      <div *ngIf="initError()" class="loading">
+        {{ initError() }}
+      </div>
+
+      <div *ngFor="let msg of messages()" [ngClass]="isOwnMessage(msg) ? 'message own' : 'message other'">
+        <div class="message-sender">{{ getSenderLabel(msg) }}</div>
+        <div class="message-content">{{ msg.contenu }}</div>
+        <div class="message-time">{{ msg.horodatage | date: 'HH:mm' }}</div>
+      </div>
+    </div>
+
+    <div class="chat-input-area" *ngIf="conversation()">
+      <input
+        type="text"
+        [ngModel]="newMessage()"
+        (ngModelChange)="newMessage.set($event)"
+        (keyup.enter)="sendMessage()"
+        placeholder="Votre message..."
+        [disabled]="isLoading()"
+      />
+      <button (click)="sendMessage()" [disabled]="isLoading() || !newMessage().trim()">
+        {{ isLoading() ? '...' : 'Envoyer' }}
+      </button>
+    </div>
   </div>
 </div>

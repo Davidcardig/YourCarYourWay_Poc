@@ -7,7 +7,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -25,11 +24,19 @@ public class ChatController {
 
     @PostMapping("/conversations")
     public ResponseEntity<ConversationDTO> createConversation(@RequestBody Map<String, String> body) {
-        UUID clientId = UUID.fromString(body.get("clientId"));
-        String canal = body.getOrDefault("canal", "CHAT");
+        UUID userId = UUID.fromString(body.get("userId"));
+        String sujet = body.get("sujet");
         
-        ConversationDTO conversation = chatService.createConversation(clientId, canal);
+        ConversationDTO conversation = chatService.createConversation(userId, sujet);
         return ResponseEntity.status(HttpStatus.CREATED).body(conversation);
+    }
+
+    @GetMapping("/conversations")
+    public ResponseEntity<List<ConversationDTO>> getUserConversations(
+            @RequestParam UUID userId
+    ) {
+        List<ConversationDTO> conversations = chatService.getUserConversations(userId);
+        return ResponseEntity.ok(conversations);
     }
 
     @GetMapping("/conversations/{id}")
@@ -67,5 +74,12 @@ public class ChatController {
         }
         
         return ResponseEntity.badRequest().build();
+    }
+
+    @PatchMapping("/conversations/{id}/assign")
+    public ResponseEntity<ConversationDTO> assignConversation(@PathVariable UUID id, @RequestBody Map<String, String> body) {
+        UUID agentUserId = UUID.fromString(body.get("agentUserId"));
+        ConversationDTO conversation = chatService.assignConversationToAgent(id, agentUserId);
+        return ResponseEntity.ok(conversation);
     }
 }
