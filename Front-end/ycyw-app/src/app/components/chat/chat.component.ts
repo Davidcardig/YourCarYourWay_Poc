@@ -59,6 +59,7 @@ export class ChatComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.chatService.stopPolling();
+    this.chatService.disconnect();
     this.destroy$.next();
     this.destroy$.complete();
   }
@@ -148,14 +149,15 @@ export class ChatComponent implements OnInit, OnDestroy {
     this.conversation.set(conversation);
     this.messages.set([]);
     this.chatService.stopPolling();
+    this.chatService.connect();
     this.chatService.getMessages(conversation.id)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (messages) => {
           this.messages.set(messages);
+          this.chatService.subscribeToConversation(conversation.id);
         }
       });
-    this.chatService.startPolling(conversation.id);
   }
 
   sendMessage(): void {
@@ -172,7 +174,7 @@ export class ChatComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (message) => {
-          this.messages.update(current => [...current, message]);
+          this.messages.update(current => current.some(existing => existing.id === message.id) ? current : [...current, message]);
           this.isLoading.set(false);
         },
         error: (err) => {
