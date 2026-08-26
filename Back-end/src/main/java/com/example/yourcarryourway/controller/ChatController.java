@@ -5,6 +5,7 @@ import com.example.yourcarryourway.dto.MessageDTO;
 import com.example.yourcarryourway.service.ChatService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,9 +18,11 @@ import java.util.UUID;
 public class ChatController {
     
     private final ChatService chatService;
+    private final SimpMessagingTemplate messagingTemplate;
 
-    public ChatController(ChatService chatService) {
+    public ChatController(ChatService chatService, SimpMessagingTemplate messagingTemplate) {
         this.chatService = chatService;
+        this.messagingTemplate = messagingTemplate;
     }
 
     @PostMapping("/conversations")
@@ -61,6 +64,7 @@ public class ChatController {
         }
         
         MessageDTO message = chatService.addMessage(id, expediteur, contenu);
+        messagingTemplate.convertAndSend("/topic/conversation." + id, message);
         return ResponseEntity.status(HttpStatus.CREATED).body(message);
     }
 
