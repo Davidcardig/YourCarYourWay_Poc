@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { BehaviorSubject, Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { Client, IMessage, StompSubscription } from '@stomp/stompjs';
 import { Conversation, Message } from '../models/chat.model';
 
@@ -12,8 +12,14 @@ export class ChatService {
   private websocketUrl = 'ws://localhost:8080/ws/websocket';
   private messagesSubject = new BehaviorSubject<Message[]>([]);
   public messages$ = this.messagesSubject.asObservable();
+  private conversationsSubject = new BehaviorSubject<Conversation[]>([]);
+  public conversationsUpdate$ = this.conversationsSubject.asObservable();
+  private conversationClosedSubject = new BehaviorSubject<string | null>(null);
+  public conversationClosed$ = this.conversationClosedSubject.asObservable();
   private stompClient: Client | null = null;
   private conversationSubscription: StompSubscription | null = null;
+  private conversationsSubscription: StompSubscription | null = null;
+  private conversationClosedSubscription: StompSubscription | null = null;
   private activeConversationId: string | null = null;
 
   constructor(private http: HttpClient) {}
@@ -56,6 +62,7 @@ export class ChatService {
       heartbeatOutgoing: 4000,
       debug: () => undefined,
       onConnect: () => {
+        this.subscribeToConversationsUpdates();
         if (this.activeConversationId) {
           this.subscribeToConversation(this.activeConversationId);
         }
@@ -63,6 +70,25 @@ export class ChatService {
     });
 
     this.stompClient.activate();
+  }
+
+  subscribeToConversationsUpdates(): void {
+    if (!this.stompClient?.active) {
+      this.connect();
+      return;
+    }
+
+    if (this.conversationsSubscription) {
+      this.conversationsSubscription.unsubscribe();
+    }
+
+    this.conversationsSubscription = this.stompClient.subscribe(
+      `/topic/conversations.agents`,
+      (message: IMessage) => {
+        const payload = JSON.parse(message.body) as Conversation;
+        this.conversationsSubject.next([payload]);
+      }
+    );
   }
 
   subscribeToConversation(conversationId: string): void {
@@ -83,6 +109,11 @@ export class ChatService {
       this.conversationSubscription = null;
     }
 
+    if (this.conversationClosedSubscription) {
+      this.conversationClosedSubscription.unsubscribe();
+      this.conversationClosedSubscription = null;
+    }
+
     this.conversationSubscription = this.stompClient.subscribe(
       `/topic/conversation.${conversationId}`,
       (message: IMessage) => {
@@ -90,9 +121,23 @@ export class ChatService {
         this.messagesSubject.next(this.appendMessageIfMissing(payload));
       }
     );
+
+    this.conversationClosedSubscription = this.stompClient.subscribe(
+      `/topic/conversation.${conversationId}`,
+      (message: IMessage) => {
+        try {
+          const payload = JSON.parse(message.body);
+          if (payload.statut === 'FERMEE') {
+            this.conversationClosedSubject.next(conversationId);
+          }
+        } catch (e) {
+          // Not a JSON message, skip
+        }
+      }
+    );
   }
 
-  startPolling(conversationId: string, intervalMs: number = 2000): void {
+  startPolling(conversationId: string): void {
     this.subscribeToConversation(conversationId);
   }
 
@@ -107,6 +152,14 @@ export class ChatService {
 
   disconnect(): void {
     this.stopPolling();
+    if (this.conversationsSubscription) {
+      this.conversationsSubscription.unsubscribe();
+      this.conversationsSubscription = null;
+    }
+    if (this.conversationClosedSubscription) {
+      this.conversationClosedSubscription.unsubscribe();
+      this.conversationClosedSubscription = null;
+    }
     if (this.stompClient) {
       this.stompClient.deactivate();
       this.stompClient = null;

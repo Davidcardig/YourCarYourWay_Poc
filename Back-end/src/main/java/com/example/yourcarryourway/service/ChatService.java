@@ -10,6 +10,7 @@ import com.example.yourcarryourway.repository.ConversationRepository;
 import com.example.yourcarryourway.repository.MessageRepository;
 import com.example.yourcarryourway.repository.UserRepository;
 import org.springframework.http.HttpStatus;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
@@ -24,11 +25,13 @@ public class ChatService {
     private final ConversationRepository conversationRepository;
     private final UserRepository userRepository;
     private final MessageRepository messageRepository;
+    private final SimpMessagingTemplate messagingTemplate;
 
-    public ChatService(ConversationRepository conversationRepository, UserRepository userRepository, MessageRepository messageRepository) {
+    public ChatService(ConversationRepository conversationRepository, UserRepository userRepository, MessageRepository messageRepository, SimpMessagingTemplate messagingTemplate) {
         this.conversationRepository = conversationRepository;
         this.userRepository = userRepository;
         this.messageRepository = messageRepository;
+        this.messagingTemplate = messagingTemplate;
     }
 
     public ConversationDTO createConversation(UUID userId, String sujet) {
@@ -48,7 +51,9 @@ public class ChatService {
         Conversation conversation = new Conversation(user, sujet.trim());
         userRepository.findFirstByRole(UserRole.AGENT).ifPresent(conversation::setAgentUser);
         conversationRepository.save(conversation);
-        return toDTO(conversation);
+        ConversationDTO dto = toDTO(conversation);
+        messagingTemplate.convertAndSend("/topic/conversations.agents", dto);
+        return dto;
     }
 
     public List<ConversationDTO> getUserConversations(UUID userId) {
@@ -82,7 +87,9 @@ public class ChatService {
 
         conversation.setAgentUser(agentUser);
         conversationRepository.save(conversation);
-        return toDTO(conversation);
+        ConversationDTO dto = toDTO(conversation);
+        messagingTemplate.convertAndSend("/topic/conversations.agents", dto);
+        return dto;
     }
 
     public ConversationDTO getConversation(UUID conversationId) {
@@ -113,7 +120,10 @@ public class ChatService {
         
         conversation.setStatut(CLOSED_STATUS);
         conversationRepository.save(conversation);
-        return toDTO(conversation);
+        ConversationDTO dto = toDTO(conversation);
+        messagingTemplate.convertAndSend("/topic/conversations.agents", dto);
+        messagingTemplate.convertAndSend("/topic/conversation." + conversationId, dto);
+        return dto;
     }
 
     private ConversationDTO toDTO(Conversation conversation) {

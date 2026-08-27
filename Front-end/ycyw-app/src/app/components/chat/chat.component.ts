@@ -42,6 +42,21 @@ export class ChatComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe(msgs => this.messages.set(msgs));
 
+    this.chatService.conversationsUpdate$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(() => this.loadConversations());
+
+    this.chatService.conversationClosed$
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(closedConversationId => {
+        if (closedConversationId === this.conversation()?.id) {
+          this.chatService.stopPolling();
+          this.conversation.set(null);
+          this.messages.set([]);
+          this.loadConversations();
+        }
+      });
+
     const user = this.authService.getCurrentUser();
     if (user) {
       if (!user.role) {
@@ -49,6 +64,7 @@ export class ChatComponent implements OnInit, OnDestroy {
       }
       this.currentUser.set(user);
       this.userId = user.userId;
+      this.chatService.connect();
       this.loadConversations();
       return;
     }
@@ -188,14 +204,16 @@ export class ChatComponent implements OnInit, OnDestroy {
   closeChat(): void {
     const conversation = this.conversation();
     if (conversation) {
+      this.isLoading.set(true);
       this.chatService.closeConversation(conversation.id)
         .pipe(takeUntil(this.destroy$))
         .subscribe({
           next: () => {
-            this.chatService.stopPolling();
-            this.conversation.set(null);
-            this.messages.set([]);
-            this.loadConversations();
+            this.isLoading.set(false);
+          },
+          error: (err) => {
+            console.error('Erreur fermeture conversation:', err);
+            this.isLoading.set(false);
           }
         });
     }
